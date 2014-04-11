@@ -9,6 +9,12 @@
 <body>
 	<script>
 		ch = Chess({ append: 'body' });
+		// test
+		ch.right.add('name', function () {
+			console.log(this.start);
+		});
+		ch.type.add('Конь');
+		ch.element.add('Конь', [2,2]);
 	</script>
 </body>
 </html>
