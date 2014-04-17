@@ -10,11 +10,38 @@
 	<script>
 		ch = Chess({ append: 'body' });
 		// test
-		ch.right.add('name', function () {
-			console.log(this.start);
+		// ch.right.add('name', function (el) {
+		//	 console.log(el.start);
+		// });
+		ch.type.add('Пешка');
+		ch.type.add('Слон');
+		ch.type.add('Ферзь');
+		ch.type.add('Король');
+		
+		
+		for (var i = 1; i < 9; i++) {
+			ch.element.add('Пешка', [2, i]);
+			ch.element.add('Пешка', [7, i]);
+		}
+		ch.right.add('Шаг', function (el, new_pos) {
+			if ( el.start[0] == 7 && ( el.position[0] + 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) 
+			console.log('элемент сдвинулся вверх "'+new_pos+'"')
+			return true;
+			if ( el.start[0] == 2 && ( el.position[0] - 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) {
+			console.log ('элемент сдвинулся вниз "'+new_pos+'"' )
+			return true;}
+			return false;
+			
 		});
-		ch.type.add('Конь');
-		ch.element.add('Конь', [2,2]);
+		
+		ch.right.add('Шаг + 2', function (el, new_pos) {
+		
+			if((el.position[0]+ 2 == new_pos[0]) && (el.position[1] == new_pos[1]) && (el.start == el.position)) {
+				return true;
+			}
+			return false;
+		});
+		ch.type.addRight('Пешка', ['Шаг', 'Шаг + 2'])
 	</script>
 </body>
 </html>
