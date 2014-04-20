@@ -6,6 +6,7 @@ function Chess (arg) {
 	// Переменная для элементов шахмат
 	chs.element = [];
 	chs.element.all = [];
+	chs.element.basket = [];
 	// Список правил для фигур
 	chs.right = [];
 	chs.right.all = [];
@@ -74,7 +75,7 @@ function Chess (arg) {
 					start: _start,
 					position:_start,
 					newPosition: function (new_pos) {
-						if ((new_pos[0] >= 1 && new_pos[0] <= 8 )&&( new_pos [1] >= 1 && new_pos [1] <= 8)){
+						if ((new_pos[0] >= 1 && new_pos[0] <= 8 )&&( new_pos [1] >= 1 && new_pos [1] <= 8)) {
 							var n_rights = this.type.rights.length;
 							console.log('rights', n_rights);
 							for (var i = 0; i < n_rights; i++) {
@@ -85,8 +86,16 @@ function Chess (arg) {
 								}
 							}
 						}
-						
 						return false;
+					},
+					kill: function (n) {
+						el_kill_start = chs.element.all[n].start;
+						console.log('killing', el_kill_start);
+						if (el_kill_start[0] <= this.start[0] + 1 && el_kill_start[0] >= this.start[0] - 1) {
+							return false;
+						}
+						chs.element.del(n);
+						return true;
 					}
 				});
 				return true;
@@ -95,6 +104,11 @@ function Chess (arg) {
 		console.log(chs.type.all.indexOf(_type), _start.splice(), _start.length);
 		return false;
 	};
+	
+	chs.element.del = function (n) {
+		in_basket = chs.element.all.splice(n, 1);
+		chs.element.basket.push(in_basket);
+	}
 	
 
 	return chs;
