@@ -17,12 +17,22 @@
 		ch.type.add('Слон');
 		ch.type.add('Ферзь');
 		ch.type.add('Король');
+		ch.type.add('Ладья');
+		ch.type.add('Конь');
 		
 		
 		for (var i = 1; i < 9; i++) {
 			ch.element.add('Пешка', [2, i]);
 			ch.element.add('Пешка', [7, i]);
 		}
+		//добавление ладьи
+		ch.element.add('Ладья',[8,1]);
+		ch.element.add('Ладья',[8,8]);
+		ch.element.add('Ладья',[1,1]);
+		ch.element.add('Ладья',[1,8]);
+		
+		
+		
 		ch.right.add('Шаг', function (el, new_pos) {
 			if ( el.start[0] == 7 && ( el.position[0] + 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) 
 			console.log('элемент сдвинулся вверх "'+new_pos+'"')
@@ -42,6 +52,29 @@
 			return false;
 		});
 		ch.type.addRight('Пешка', ['Шаг', 'Шаг + 2'])
+		
+		
+		ch.right.add('Ход по вертикали',function (el,new_pos){
+			for (var i = 1; i < 9; i++ ) {
+				if ((el.start[0] == 1 && el.position[0] - [i] == new_pos[0]) && (el.position[1] == new_pos[1]))
+					return true;
+				if ((el.start[0] == 8 && el.position[0] + [i] == new_pos[0]) && (el.position[1] == new_pos[1]))
+					return true;				
+			}
+			return false;
+		});
+		
+		ch.right.add('Ход по горизонтали',function (el,new_pos){
+			for (var i = 1; i < 9; i++ ) {	
+				if ((el.start[0] == 1 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
+					return true;	
+				if ((el.start[0] == 8 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
+					return true;	
+			}
+			return false;		
+		});
+		ch.type.addRight('Ладья', ['Ход по вертикали'])
+		ch.type.addRight('Ладья', ['Ход по горизонтали'])
 	</script>
 </body>
 </html>
