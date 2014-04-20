@@ -30,8 +30,11 @@
 		ch.element.add('Ладья',[8,8]);
 		ch.element.add('Ладья',[1,1]);
 		ch.element.add('Ладья',[1,8]);
-		
-		
+		//добавление коня
+		ch.element.add('Конь',[8,2]);
+		ch.element.add('Конь',[8,7]);
+		ch.element.add('Конь',[1,2]);
+		ch.element.add('Конь',[1,7]);
 		
 		ch.right.add('Шаг', function (el, new_pos) {
 			if ( el.start[0] == 7 && ( el.position[0] + 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) 
@@ -54,27 +57,45 @@
 		ch.type.addRight('Пешка', ['Шаг', 'Шаг + 2'])
 		
 		
-		ch.right.add('Ход по вертикали',function (el,new_pos){
-			for (var i = 1; i < 9; i++ ) {
-				if ((el.start[0] == 1 && el.position[0] - [i] == new_pos[0]) && (el.position[1] == new_pos[1]))
-					return true;
-				if ((el.start[0] == 8 && el.position[0] + [i] == new_pos[0]) && (el.position[1] == new_pos[1]))
+		ch.right.add('Ход по вертикали',function (el, new_pos){
+			for (var i = 1; i < 9; i++) {
+				if ( (el.start[0] == 1 || 8) && (el.position[0] + i == new_pos[0] || el.position[0] - i == new_pos[0]) && el.position[1] == new_pos[1])
 					return true;				
 			}
 			return false;
 		});
 		
-		ch.right.add('Ход по горизонтали',function (el,new_pos){
-			for (var i = 1; i < 9; i++ ) {	
+		ch.right.add('Ход по горизонтали', function (el,new_pos) {
+			for (var i = 1; i < 9; i++ ) {
 				if ((el.start[0] == 1 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
-					return true;	
+					return true;
 				if ((el.start[0] == 8 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
 					return true;	
 			}
 			return false;		
 		});
-		ch.type.addRight('Ладья', ['Ход по вертикали'])
-		ch.type.addRight('Ладья', ['Ход по горизонтали'])
+		ch.type.addRight('Ладья', ['Ход по вертикали','Ход по горизонтали'])
+		
+		ch.right.add ('Ход буквой г', function (el,new_pos) {
+			if (el.start[0] == 1 && (el.position[0] - 2 == new_pos[0]) && (el.position[1] - 1 || el.position[1] + 1) == new_pos[1]){
+				return true;
+			}
+			if (el.start[0] == 1 && (el.position[0] - 1 == new_pos[0]) && (el.position[1] - 2 || el.position[1] + 2) == new_pos[1]){
+				return true;
+			}
+			if (el.start[0] == 8 && (el.position[0] + 2 == new_pos[0]) && (el.position[1] + 1 || el.position[1] - 1) == new_pos[1]){
+				return true;
+			}
+			if (el.start[0] == 8 && (el.position[0] + 1 == new_pos[0]) && (el.position[1] + 2 || el.position[1] - 2) == new_pos[1]){
+				return true;
+			}	
+			return false;
+		});
+		ch.type.addRight('Конь',['Ход буквой г'])
+			
+			
+
+		
 	</script>
 </body>
 </html>
