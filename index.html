@@ -58,11 +58,6 @@
 		
 		
 		ch.right.add('Ход по вертикали',function (el, new_pos) {
-			//for (var i = 1; i < 9; i++) {
-				//if ( (el.start[0] == 1 || 8) && (el.position[0] + i == new_pos[0] || el.position[0] - i == new_pos[0]) && el.position[1] == new_pos[1])
-					//return true;				
-			//}
-			//return false;
 			if (el.position[1] == new_pos[1] && el.position[0] != new_pos[0]) {
 				if (el.position[0] < new_pos[0]) {
 					for (var i = el.position[0] + 1; i < new_pos[0]; i++) {
@@ -83,13 +78,24 @@
 		});
 		
 		ch.right.add('Ход по горизонтали', function (el,new_pos) {
-			for (var i = 1; i < 9; i++ ) {
-				if ((el.start[0] == 1 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
-					return true;
-				if ((el.start[0] == 8 && el.position[0] == new_pos[0]) && (el.position[1] + [i] == new_pos[1]))
-					return true;	
+			if (el.position[0] == new_pos[0] && el.position[1] != new_pos[1]) {
+				if (el.position[1] < new_pos[1]) {
+					for (var i = el.position[1] + 1; i < new_pos[1]; i++) {
+						if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [i, new_pos[1]]) != -1) {
+							return false;
+						}
+					}
+					el_new_pos = ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos);
+					if (el_new_pos != -1) {
+						el.kill(el_new_pos);
+					}
+				}
+				else { 
+					
+				}
 			}
-			return false;		
+			return false;
+		
 		});
 		ch.type.addRight('Ладья', ['Ход по вертикали','Ход по горизонтали'])
 		
