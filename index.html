@@ -3,16 +3,18 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Chess</title>
+	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css">
+	<style>
+		img { padding:0; margin:auto;display:block; }
+		div {padding:0;margin:0;}
+		div.string { height:50px; }
+		div.square { text-align:center; }
+	</style>
 	<script src="js/jquery-1.11.0.min.js"></script>
 	<script src="js/chess.js"></script>
-</head>
-<body>
 	<script>
-		ch = Chess({ append: 'body' });
-		// test
-		// ch.right.add('name', function (el) {
-		//	 console.log(el.start);
-		// });
+		ch = Chess({ append: '#chess1' });
+		// Добавление типов
 		ch.type.add('Пешка');
 		ch.type.add('Слон');
 		ch.type.add('Ферзь');
@@ -20,105 +22,163 @@
 		ch.type.add('Ладья');
 		ch.type.add('Конь');
 		
-		
+		// Раставляем пешки
 		for (var i = 1; i < 9; i++) {
 			ch.element.add('Пешка', [2, i]);
 			ch.element.add('Пешка', [7, i]);
 		}
-		//добавление ладьи
+		
+		// Добавляем ладьи
 		ch.element.add('Ладья',[8,1]);
 		ch.element.add('Ладья',[8,8]);
 		ch.element.add('Ладья',[1,1]);
 		ch.element.add('Ладья',[1,8]);
-		//добавление коня
+		
+		// Добавляем коней
 		ch.element.add('Конь',[8,2]);
 		ch.element.add('Конь',[8,7]);
 		ch.element.add('Конь',[1,2]);
 		ch.element.add('Конь',[1,7]);
 		
-		ch.right.add('Шаг', function (el, new_pos) {
-			if ( el.start[0] == 7 && ( el.position[0] + 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) 
-			console.log('элемент сдвинулся вверх "'+new_pos+'"')
-			return true;
-			if ( el.start[0] == 2 && ( el.position[0] - 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) {
-			console.log ('элемент сдвинулся вниз "'+new_pos+'"' )
-			return true;}
-			return false;
-			
-		});
+		// Добавляем слонов
+		ch.element.add('Слон',[8,3]);
+		ch.element.add('Слон',[8,6]);
+		ch.element.add('Слон',[1,6]);
+		ch.element.add('Слон',[1,3]);
 		
-		ch.right.add('Шаг + 2', function (el, new_pos) {
+		// Добавляем королей
+		ch.element.add('Король',[8,5]);
+		ch.element.add('Король',[1,5]);
 		
-			if((el.position[0]+ 2 == new_pos[0]) && (el.position[1] == new_pos[1]) && (el.start == el.position)) {
+		// Добавляем королей
+		ch.element.add('Ферзь',[8,4]);
+		ch.element.add('Ферзь',[1,4]);
+		
+		// ПРАВИЛА
+		//  РАЗРЕШАЮЩИЕ ПРАВИЛА
+		// - шаг для пешки
+		ch.right.add('+ Шаг', function (el, new_pos) {
+			if ( el.team() == 0 && ( el.position[0] + 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) {
+				//console.log('элемент сдвинулся вниз "'+new_pos+'"');
 				return true;
 			}
-			return false;
+			if ( el.team() == 1 && ( el.position[0] - 1 == new_pos[0] ) && ( el.position[1] == new_pos[1] ) ) {
+				//console.log ('элемент сдвинулся вверх "'+new_pos+'"');
+				return true;
+			}
 		});
-		ch.type.addRight('Пешка', ['Шаг', 'Шаг + 2'])
 		
 		
-		ch.right.add('Ход по вертикали',function (el, new_pos) {
-			if (el.position[1] == new_pos[1] && el.position[0] != new_pos[0]) {
-				if (el.position[0] < new_pos[0]) {
-					for (var i = el.position[0] + 1; i < new_pos[0]; i++) {
-						if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [new_pos[0], i]) != -1) {
-							return false;
-						}
-					}
-					el_new_pos = ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos);
-					if (el_new_pos != -1) {
-						el.kill(el_new_pos);
-					}
-				}
-				else { 
-					
+		// - 2 шага для пешки
+		ch.right.add('+ Шаг 2', function (el, new_pos) {
+			if (el.inf.step2 != true) {
+				if ( (el.position = el.start) && ((el.team() == 0 && ( el.position[0] + 2 == new_pos[0] ) && ( el.position[1] == new_pos[1] )) || (el.team() == 1 && ( el.position[0] - 2 == new_pos[0] ) && ( el.position[1] == new_pos[1] ))) ) {
+					el.inf.step2 = true;
+					return true;
 				}
 			}
-			return false;
 		});
 		
-		ch.right.add('Ход по горизонтали', function (el,new_pos) {
+		ch.right.add('+ Ход по диагонали', function (el, new_pos) {
+			// по диагонали
+			if (el.position[0] != new_pos[0] && el.position[1] != new_pos[1] && Math.abs(el.position[0] - new_pos[0]) == Math.abs(el.position[1] - new_pos[1])) {
+				var steps = Math.abs(el.position[0] - new_pos[0]);
+				var factor0 = (new_pos[0] - el.position[0])/steps;
+				var factor1 = (new_pos[1] - el.position[1])/steps;
+				if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0] + (steps * factor0), el.position[1]  + (steps * factor1)]) == -1) return true;
+			}
+		});
+		
+		ch.right.add('+ Ход по вертикали и горизонтали', function (el, new_pos) {	
+			// по вертикали
+			if (el.position[0] != new_pos[0] && el.position[1] == new_pos[1]) {
+				var steps = Math.abs(el.position[0] - new_pos[0]);
+				var factor0 = (new_pos[0] - el.position[0])/steps;
+				if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0] + (steps * factor0), el.position[1]]) == -1) return true;
+			}
+			// по горизонтали
 			if (el.position[0] == new_pos[0] && el.position[1] != new_pos[1]) {
-				if (el.position[1] < new_pos[1]) {
-					for (var i = el.position[1] + 1; i < new_pos[1]; i++) {
-						if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [i, new_pos[1]]) != -1) {
-							return false;
-						}
-					}
-					el_new_pos = ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos);
-					if (el_new_pos != -1) {
-						el.kill(el_new_pos);
+				var steps = Math.abs(el.position[1] - new_pos[1]);
+				var factor1 = (new_pos[1] - el.position[1])/steps;
+				if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0], el.position[1]  + (steps * factor1)]) == -1) return true;
+			}
+		});
+		
+		
+		//  ОГРАНИЧИВАЮЩИЕ ПРАВИЛА
+		// - помеха на пути
+		ch.right.add('- На пути помеха', function (el, new_pos) {
+			// по диагонали
+			if (el.position[0] != new_pos[0] && el.position[1] != new_pos[1] && Math.abs(el.position[0] - new_pos[0]) == Math.abs(el.position[1] - new_pos[1])) {
+				var steps = Math.abs(el.position[0] - new_pos[0]);
+				var factor0 = (new_pos[0] - el.position[0])/steps;
+				var factor1 = (new_pos[1] - el.position[1])/steps;
+				for (var i = 1; i < steps; i++) {
+					if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0] + (i * factor0), el.position[1]  + (i * factor1)]) != -1) return false;
+				}
+			}
+			// по вертикали
+			if (el.position[0] != new_pos[0] && el.position[1] == new_pos[1]) {
+				var steps = Math.abs(el.position[0] - new_pos[0]);
+				var factor0 = (new_pos[0] - el.position[0])/steps;
+				for (var i = 1; i < steps; i++) {
+					if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0] + (i * factor0), el.position[1]]) != -1) return false;
+				}
+			}
+			// по горизонтали
+			if (el.position[0] == new_pos[0] && el.position[1] != new_pos[1]) {
+				var steps = Math.abs(el.position[1] - new_pos[1]);
+				var factor1 = (new_pos[1] - el.position[1])/steps;
+				for (var i = 1; i < steps; i++) {
+					if (ch.fn.findSubstrInSubstr(ch.element.all, 'position', [el.position[0], el.position[1]  + (i * factor1)]) != -1) return false;
+				}
+			}
+		});
+		
+		// - перед пешкой припятствие
+		ch.right.add('- Препядствие перед пешкой в цели', function (el, new_pos) { 
+			if ( ((Number(el.position[0]) - Number(el.factor())) == new_pos[0] || (Number(el.position[0]) - Number(el.factor())  - Number(el.factor())) == new_pos[0]) && el.position[1] == new_pos[1] && ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos) > -1) return false; 
+		});
+		
+		// - ход конем
+		ch.right.add ('Ход конём', function (el,new_pos) {
+			
+		});
+		
+		//  КИЛЛЕРЫ
+		// - пешка
+		ch.right.add('! Пешка', function (el, new_pos) {
+			if ( (Number(el.position[0]) - Number(el.factor())) && ( el.position[1] + 1 == new_pos[1]  || el.position[1] - 1 == new_pos[1] )) {
+				var n = ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos);
+				if (n > -1 && el.kill(n)) return true
+				else {
+					if ((el.team() == 0 && new_pos[1] == 6) || (el.team() == 1 && new_pos[1] == 3)) {
+						// Взятие на проходе
+						n = ch.fn.findSubstrInSubstr(ch.element.all, 'position', [new_pos[0] + Number(el.factor()), new_pos[1]]);
+						// Работа с историей
+						if (n > -1 && ch.history.all.slice(-1)[0].element == ch.element.all[n] && ch.element.all[n].inf.step2 && el.kill(n)) return true;
 					}
 				}
-				else { 
-					
-				}
 			}
-			return false;
-		
 		});
-		ch.type.addRight('Ладья', ['Ход по вертикали','Ход по горизонтали'])
 		
-		ch.right.add ('Ход буквой г', function (el,new_pos) {
-			if (el.start[0] == 1 && (el.position[0] - 2 == new_pos[0]) && (el.position[1] - 1 || el.position[1] + 1) == new_pos[1]){
-				return true;
-			}
-			if (el.start[0] == 1 && (el.position[0] - 1 == new_pos[0]) && (el.position[1] - 2 || el.position[1] + 2) == new_pos[1]){
-				return true;
-			}
-			if (el.start[0] == 8 && (el.position[0] + 2 == new_pos[0]) && (el.position[1] + 1 || el.position[1] - 1) == new_pos[1]){
-				return true;
-			}
-			if (el.start[0] == 8 && (el.position[0] + 1 == new_pos[0]) && (el.position[1] + 2 || el.position[1] - 2) == new_pos[1]){
-				return true;
-			}	
-			return false;
+		// - убийство
+		ch.right.add('! Убийство цели', function (el, new_pos) {
+			var n = ch.fn.findSubstrInSubstr(ch.element.all, 'position', new_pos);
+			if (n > -1 && el.kill(n)) return true
 		});
-		ch.type.addRight('Конь',['Ход буквой г'])
+		
+		// РАЗДАЧА ПРАВ ТИПАМ
+		ch.type.addRight('Пешка', [ '- На пути помеха', '- Препядствие перед пешкой в цели', '+ Шаг', '+ Шаг 2', '! Пешка']);
+		ch.type.addRight('Ферзь', ['- На пути помеха', '+ Ход по вертикали и горизонтали', '+ Ход по диагонали', '! Убийство цели']);
+		ch.type.addRight('Ладья', ['- На пути помеха', '+ Ход по вертикали и горизонтали', '! Убийство цели']);
+		ch.type.addRight('Слон',  ['- На пути помеха', '+ Ход по диагонали', '! Убийство цели']);
+		ch.type.addRight('Конь',  ['Ход конём','! Убийство цели']);
 			
-			
-
 		
 	</script>
+</head>
+<body>
+	<div id="chess1" class="chess"></div>
 </body>
 </html>
